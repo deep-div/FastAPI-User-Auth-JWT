@@ -4,14 +4,10 @@ from fastapi import FastAPI, Depends, HTTPException,status
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .models import TokenTable
+from .utils import ALGORITHM, JWT_SECRET_KEY
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
-REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
-ALGORITHM = "HS256"
-JWT_SECRET_KEY = "narscbjim@$@&^@&%^&RFghgjvbdsha"   # should be kept secret
-JWT_REFRESH_SECRET_KEY = "13ugfdfgh@#$%^@&jkl45678902"
 
-def decodeJWT(jwtoken: str):
+def decodeJWT(jwtoken: str): # convert jwt to payload # we encryted the user.id in the jwttoken while creating it in function  create_access_token
     try:
         # Decode and verify the token
         payload = jwt.decode(jwtoken, JWT_SECRET_KEY, ALGORITHM)
@@ -20,12 +16,14 @@ def decodeJWT(jwtoken: str):
         return None
 
 
+# decide if token is valid or not
 class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request):
-        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+        #  this line means token is extracted from the HTTP request:
+        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request) 
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
