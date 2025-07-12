@@ -10,6 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 from .auth_bearer import JWTBearer
 from functools import wraps
 from .utils import create_access_token,create_refresh_token,verify_password, get_hashed_password
+import uvicorn
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
@@ -121,3 +122,6 @@ def logout(dependencies=Depends(JWTBearer()), db: Session = Depends(get_session)
         db.refresh(existing_token)
     return {"message":"Logout Successfully"} 
 
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", port=5000, log_level="info", reload=True)
